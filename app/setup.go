@@ -113,6 +113,7 @@ func (m SetupModel) Update(msg tea.Msg) (SetupModel, tea.Cmd) {
 	}
 
 	m.TextInputSecret, cmd = m.TextInputSecret.Update(msg)
+	m.TextInputKey, cmd = m.TextInputKey.Update(msg)
 	return m, cmd
 }
 
