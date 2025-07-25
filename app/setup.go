@@ -16,12 +16,20 @@ type TestQuery struct {
 	Skip int `url:"skip"` // = 0
 }
 
-func TestSpaceshipAPI(key, secret string) (bool, string) {
-	// Check if either/both or them are not 64 characters long
+type ErrorMsg struct {
+	Text string
+}
+
+type SuccessMsg struct {
+	Text string
+}
+
+func TestSpaceshipAPI(key, secret string) tea.Msg {
 	if len(key) != 64 || len(secret) != 64 {
-		return false, "Key and secret must be 64 characters long!"
+		return ErrorMsg{
+			Text: "Invalid key or secret length. Both should be 64 characters long.",
+		}
 	}
-	// Check it by calling spaceship api
 
 	params := TestQuery{
 		Take: 1,
@@ -31,7 +39,9 @@ func TestSpaceshipAPI(key, secret string) (bool, string) {
 	url := "https://api.spaceship.com/domains?" + v.Encode()
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		panic(err)
+		return ErrorMsg{
+			Text: "failed to build request",
+		}
 	}
 	req.Header.Set("X-API-Key", key)
 	req.Header.Set("X-API-Secret", secret)
@@ -39,14 +49,22 @@ func TestSpaceshipAPI(key, secret string) (bool, string) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return false, "the connection failed... are you online?"
+		return ErrorMsg{
+			Text: "the connection failed... are you online?",
+		}
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
-		return false, "uh captain we got an error, please check your key and secret!"
+		return ErrorMsg{
+			Text: "uh captain we got an error, please check your key and secret!",
+		}
 	}
-	// If we reach here, the key and secret are valid
-	return true, "doing some strange work behind the scenes..."
+
+	return SuccessMsg{
+		Text: "doing some strange work behind the scenes...",
+	}
+
 }
 
 type SetupModel struct {
@@ -83,25 +101,45 @@ func (m SetupModel) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m SetupModel) Update(msg tea.Msg) (SetupModel, tea.Cmd) {
-	var cmd tea.Cmd
+func testSpaceshipCmd(key, secret string) tea.Cmd {
+	return func() tea.Msg {
+		return TestSpaceshipAPI(key, secret)
+	}
+}
 
+func (m SetupModel) Update(msg tea.Msg) (SetupModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-			if m.TextInputSecret.Value() == "" {
-				m.ErrorText = "Token cannot be empty!"
-			} else {
+			if !m.Loading {
+				key := m.TextInputKey.Value()
+				secret := m.TextInputSecret.Value()
+
+				if key == "" || secret == "" {
+					m.ErrorText = "i think you forgot one of your api key somewhere..."
+					return m, nil
+				}
+
 				m.Loading = true
+				m.ErrorText = ""
+				m.Progress = progress.New(progress.WithScaledGradient("#FF5F87", "#FFAFD7"))
+				m.Progress.SetPercent(0.0)
+
+				return m, tea.Batch(
+					testSpaceshipCmd(key, secret),
+				)
+
 			}
 		case "tab", "shift+tab":
-			if m.TextInputKey.Focused() {
-				m.TextInputKey.Blur()
-				m.TextInputSecret.Focus()
-			} else {
-				m.TextInputSecret.Blur()
-				m.TextInputKey.Focus()
+			if !m.Loading {
+				if m.TextInputKey.Focused() {
+					m.TextInputKey.Blur()
+					m.TextInputSecret.Focus()
+				} else {
+					m.TextInputSecret.Blur()
+					m.TextInputKey.Focus()
+				}
 			}
 		}
 
@@ -110,11 +148,24 @@ func (m SetupModel) Update(msg tea.Msg) (SetupModel, tea.Cmd) {
 		m.Height = msg.Height
 		m.Viewport.Width = msg.Width
 		m.Viewport.Height = msg.Height
+
+	case SuccessMsg:
+		m.Loading = false
+		m.ErrorText = ""
+
+	case ErrorMsg:
+		m.Loading = false
+		m.ErrorText = msg.Text
 	}
 
-	m.TextInputSecret, cmd = m.TextInputSecret.Update(msg)
-	m.TextInputKey, cmd = m.TextInputKey.Update(msg)
-	return m, cmd
+	var cmd1, cmd2 tea.Cmd
+	m.TextInputKey, cmd1 = m.TextInputKey.Update(msg)
+	m.TextInputSecret, cmd2 = m.TextInputSecret.Update(msg)
+	return m, tea.Batch(
+		cmd1,
+		cmd2,
+	)
+
 }
 
 func (m SetupModel) View() string {
@@ -148,15 +199,17 @@ func (m SetupModel) viewportContent() string {
 
 	var lastText = "Press 'enter' to submit."
 	if m.ErrorText != "" {
-		lastText = "Error: " + m.ErrorText
+		lastText = m.ErrorText
 	}
 
 	var Textcolor = lipgloss.Color("15")
 	if m.ErrorText != "" {
-		Textcolor = lipgloss.Color("1")
+		Textcolor = lipgloss.Color("red")
 	}
 
-	return viewportStyle.Render(lipgloss.JoinVertical(lipgloss.Top,
+	var content []string
+
+	content = append(content,
 		titleStyle.Render("Welcome to Spaceship TUI!"),
 		subtitleStyle.Render("To access your account & domains we need to have a spaceship api key AND secret. You can generate one here : https://www.spaceship.com/application/api-manager/ !"),
 		"\n",
@@ -164,8 +217,16 @@ func (m SetupModel) viewportContent() string {
 		lipgloss.NewStyle().MarginBottom(1).Render(m.TextInputKey.View()),
 		textStyle.Render("Then, your api secret:"),
 		lipgloss.NewStyle().MarginBottom(1).Render(m.TextInputSecret.View()),
-		m.Progress.View(),
-		lipgloss.NewStyle().Foreground(lipgloss.Color("red")).Render(m.ErrorText),
-		lipgloss.NewStyle().Foreground(Textcolor).Render(lastText),
-	))
+	)
+
+	if m.Loading {
+		progress := m.Progress.View()
+		if progress != "" {
+			content = append(content, lipgloss.NewStyle().MarginBottom(1).Render(progress))
+		}
+	}
+
+	content = append(content, lipgloss.NewStyle().Foreground(Textcolor).Render(lastText))
+
+	return viewportStyle.Render(lipgloss.JoinVertical(lipgloss.Top, content...))
 }
