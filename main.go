@@ -38,8 +38,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
-	m.setup, cmd = m.setup.Update(msg)
-	m.app, cmd = m.app.Update(msg)
+	if m.loggedIn {
+
+		m.app, cmd = m.app.Update(msg)
+	} else {
+		m.setup, cmd = m.setup.Update(msg)
+	}
 	return m, cmd
 }
 
