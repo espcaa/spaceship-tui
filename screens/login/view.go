@@ -14,6 +14,8 @@ var boxStyle = lipgloss.NewStyle().Padding(1, 2).
 	Margin(1, 2).
 	Align(lipgloss.Center)
 
+var errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("9")).Bold(true)
+
 var subtitleStyle = lipgloss.NewStyle().Italic(true).Foreground(lipgloss.Color("8"))
 
 var baseColor = lipgloss.Color("#475bff")
@@ -29,9 +31,10 @@ func (m LoginModel) View() string {
 
 	form := lipgloss.JoinVertical(lipgloss.Top,
 		lipgloss.NewStyle().Bold(true).Render("Spaceship"),
-		subtitleStyle.Render("Enter your Spaceship API credentials below:\n\n"),
+		subtitleStyle.Render("Enter your Spaceship API secrets and key below:\n\n"),
 		buttons,
 		subtitleStyle.Render("\nPress Tab to switch between fields. Press Enter to submit."),
+		errorStyle.Render(m.errorText),
 	)
 
 	content := lipgloss.JoinHorizontal(lipgloss.Top, logoBlock, form)

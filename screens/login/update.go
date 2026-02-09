@@ -2,6 +2,7 @@ package login
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/espcaa/spaceship-go"
 )
 
 type LoginSuccessMsg struct {
@@ -11,6 +12,21 @@ type LoginSuccessMsg struct {
 
 type Vector2 struct {
 	X, Y int
+}
+
+func loginCmd(apiKey, apiSecret string) tea.Cmd {
+	return func() tea.Msg {
+		err := spaceship.NewClient(apiKey, apiSecret).VerifyCredentials()
+
+		if err != nil {
+			return LoginErrorMsg{Error: err.Error()}
+		}
+
+		return LoginSuccessMsg{
+			ApiKey:    apiKey,
+			ApiSecret: apiSecret,
+		}
+	}
 }
 
 func (m LoginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -27,8 +43,15 @@ func (m LoginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, waveTick()
 
+	case LoginErrorMsg:
+		m.errorText = msg.Error
+		return m, nil
+
 	case tea.KeyMsg:
 		switch msg.Type {
+		case tea.KeyEnter:
+			return m, loginCmd(m.textInputs[0].Value(), m.textInputs[1].Value())
+
 		case tea.KeyTab, tea.KeyShiftTab, tea.KeyUp, tea.KeyDown:
 			s := msg.String()
 
@@ -51,6 +74,7 @@ func (m LoginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.textInputs[i].Blur()
 			}
+
 			return m, nil
 		}
 

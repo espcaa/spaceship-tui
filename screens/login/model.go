@@ -10,14 +10,14 @@ import (
 )
 
 type LoginModel struct {
-	apiKey     string
-	apiSecret  string
-	focusIndex int
-	textInputs []textinput.Model
-	wavePos    int
-	letters    []Letter
-	logoSize   Vector2
-
+	apiKey        string
+	apiSecret     string
+	focusIndex    int
+	textInputs    []textinput.Model
+	wavePos       int
+	letters       []Letter
+	logoSize      Vector2
+	errorText     string
 	currentSpaces float64
 }
 
@@ -78,6 +78,10 @@ func NewLoginModel() LoginModel {
 }
 
 type waveTickMsg time.Time
+
+type LoginErrorMsg struct {
+	Error string
+}
 
 func waveTick() tea.Cmd {
 	return tea.Tick(time.Millisecond*20, func(t time.Time) tea.Msg {

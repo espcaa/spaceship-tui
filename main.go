@@ -52,6 +52,7 @@ type credentialsLoadedMsg struct {
 }
 
 func (m initialModel) Init() tea.Cmd {
+
 	return tea.Batch(
 		m.login.Init(),
 		func() tea.Msg {
@@ -82,6 +83,7 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.apiKey = msg.ApiKey
 		m.apiSecret = msg.ApiSecret
 		m.state = StateLoggedIn
+		SaveCredentials(msg.ApiKey, msg.ApiSecret)
 		return m, nil
 	}
 
@@ -111,4 +113,37 @@ func main() {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
+}
+
+func SaveCredentials(apiKey, apiSecret string) error {
+	creds := struct {
+		APIKey    string `json:"api_key"`
+		APISecret string `json:"api_secret"`
+	}{
+		APIKey:    apiKey,
+		APISecret: apiSecret,
+	}
+
+	data, err := json.MarshalIndent(creds, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	homedir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	path := homedir + "/.config/spaceship-tui/secrets.json"
+
+	err = os.MkdirAll(homedir+"/.config/spaceship-tui", 0700)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile(path, data, 0600)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
