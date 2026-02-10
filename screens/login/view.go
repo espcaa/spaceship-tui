@@ -3,6 +3,7 @@ package login
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -22,9 +23,9 @@ var baseColor = lipgloss.Color("#475bff")
 var waveColor = lipgloss.Color("15")
 
 func (m LoginModel) View() string {
-	var buttons string
+	var buttons strings.Builder
 	for _, ti := range m.textInputs {
-		buttons += ti.View() + "\n"
+		buttons.WriteString(ti.View() + "\n")
 	}
 
 	var logoBlock = m.renderAnimatedLogo(int(m.currentSpaces))
@@ -32,7 +33,7 @@ func (m LoginModel) View() string {
 	form := lipgloss.JoinVertical(lipgloss.Top,
 		lipgloss.NewStyle().Bold(true).Render("Spaceship"),
 		subtitleStyle.Render("Enter your Spaceship API secrets and key below:\n\n"),
-		buttons,
+		buttons.String(),
 		subtitleStyle.Render("\nPress Tab to switch between fields. Press Enter to submit."),
 		errorStyle.Render(m.errorText),
 	)
@@ -43,7 +44,7 @@ func (m LoginModel) View() string {
 }
 
 func (m LoginModel) renderAnimatedLogo(numberOfSpacesPerLine ...int) string {
-	var logostring string
+	var logostring strings.Builder
 	spaceSinceLastLine := 0
 	spacesAllowed := 0
 	if len(numberOfSpacesPerLine) > 0 {
@@ -54,7 +55,7 @@ func (m LoginModel) renderAnimatedLogo(numberOfSpacesPerLine ...int) string {
 		l := m.letters[i]
 
 		if l.char == '\n' {
-			logostring += "\n"
+			logostring.WriteString("\n")
 			spaceSinceLastLine = 0
 			continue
 		}
@@ -65,14 +66,14 @@ func (m LoginModel) renderAnimatedLogo(numberOfSpacesPerLine ...int) string {
 		styled = lipgloss.NewStyle().Foreground(baseColor).Render(string(l.char))
 
 		if l.char != ' ' {
-			logostring += styled
+			logostring.WriteString(styled)
 		} else if spaceSinceLastLine < spacesAllowed {
-			logostring += styled
+			logostring.WriteString(styled)
 			spaceSinceLastLine++
 		}
 	}
 
-	return logostring
+	return logostring.String()
 }
 
 func hexGlow(base string, glow float64) lipgloss.Color {

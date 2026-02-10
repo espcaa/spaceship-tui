@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/espcaa/spaceship-tui/screens/dashboard"
 	"github.com/espcaa/spaceship-tui/screens/login"
 )
 
@@ -20,30 +20,8 @@ type initialModel struct {
 	apiKey    string
 	apiSecret string
 	login     login.LoginModel
+	dashboard *dashboard.DashboardModel
 	state     AppState
-}
-
-func loadCredentials() (string, string, error) {
-
-	// load from json file
-	homedir, err := os.UserHomeDir()
-	path := homedir + "/.config/spaceship-tui/secrets.json"
-	file, err := os.ReadFile(path)
-	if err != nil {
-		return "", "", err
-	}
-
-	var creds struct {
-		APIKey    string `json:"api_key"`
-		APISecret string `json:"api_secret"`
-	}
-
-	err = json.Unmarshal(file, &creds)
-	if err != nil {
-		return "", "", err
-	}
-
-	return creds.APIKey, creds.APISecret, nil
 }
 
 type credentialsLoadedMsg struct {
@@ -56,11 +34,11 @@ func (m initialModel) Init() tea.Cmd {
 	return tea.Batch(
 		m.login.Init(),
 		func() tea.Msg {
-			apiKey, apiSecret, err := loadCredentials()
+			creds, err := LoadCredentials()
 			if err != nil {
 				return nil
 			}
-			return credentialsLoadedMsg{apiKey: apiKey, apiSecret: apiSecret}
+			return credentialsLoadedMsg{apiKey: creds.APIKey, apiSecret: creds.APISecret}
 		},
 	)
 }
@@ -76,15 +54,25 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case credentialsLoadedMsg:
 		m.apiKey = msg.apiKey
 		m.apiSecret = msg.apiSecret
+		m.dashboard = dashboard.NewDashboardModel(m.apiKey, m.apiSecret)
 		m.state = StateLoggedIn
-		return m, nil
+		return m, m.dashboard.Init()
 
 	case login.LoginSuccessMsg:
 		m.apiKey = msg.ApiKey
 		m.apiSecret = msg.ApiSecret
+		m.dashboard = dashboard.NewDashboardModel(m.apiKey, m.apiSecret)
 		m.state = StateLoggedIn
-		SaveCredentials(msg.ApiKey, msg.ApiSecret)
-		return m, nil
+		err := SaveCredentials(Credentials{
+			APIKey:    msg.ApiKey,
+			APISecret: msg.ApiSecret,
+		})
+		if err != nil {
+			return m, func() tea.Msg {
+				return login.LoginErrorMsg{Error: "Failed to save credentials: " + err.Error()}
+			}
+		}
+		return m, m.dashboard.Init()
 	}
 
 	if m.state == StateLoggedOut {
@@ -93,15 +81,16 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 
-	return m, nil
+	updatedDashboard, cmd := m.dashboard.Update(msg)
+	m.dashboard = updatedDashboard.(*dashboard.DashboardModel)
+	return m, cmd
 }
 
 func (m initialModel) View() string {
 	if m.state == StateLoggedIn {
-		return "Logged in! Press q to quit.\n"
-	} else {
-		return m.login.View()
+		return m.dashboard.View()
 	}
+	return m.login.View()
 }
 
 func main() {
@@ -113,37 +102,4 @@ func main() {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}
-}
-
-func SaveCredentials(apiKey, apiSecret string) error {
-	creds := struct {
-		APIKey    string `json:"api_key"`
-		APISecret string `json:"api_secret"`
-	}{
-		APIKey:    apiKey,
-		APISecret: apiSecret,
-	}
-
-	data, err := json.MarshalIndent(creds, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	homedir, err := os.UserHomeDir()
-	if err != nil {
-		return err
-	}
-	path := homedir + "/.config/spaceship-tui/secrets.json"
-
-	err = os.MkdirAll(homedir+"/.config/spaceship-tui", 0700)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(path, data, 0600)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
