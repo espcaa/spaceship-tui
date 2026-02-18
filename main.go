@@ -67,7 +67,7 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case credentialsLoadedMsg:
 		m.apiKey = msg.apiKey
 		m.apiSecret = msg.apiSecret
-		m.dashboard = dashboard.NewDashboardModel(m.apiKey, m.apiSecret)
+		m.dashboard = dashboard.NewDashboardModel(m.apiKey, m.apiSecret, m.db)
 		m.state = StateLoggedIn
 		return m, tea.Batch(m.dashboard.Init(), func() tea.Msg {
 			return tea.WindowSizeMsg{Width: m.width, Height: m.height}
