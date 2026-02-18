@@ -21,18 +21,18 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch r := record.(type) {
 			case spaceship.ARecord:
 				items = append(items, item{
-					title: r.Name,
-					desc:  "A Record -> " + r.Adress,
+					title: "A : " + r.Name,
+					desc:  r.Adress,
 				})
 			case spaceship.CNAMERecord:
 				items = append(items, item{
-					title: r.Name,
-					desc:  "CNAME Record -> " + r.CNAME,
+					title: "CNAME : " + r.Name,
+					desc:  r.CNAME,
 				})
 			case spaceship.TXTRecord:
 				items = append(items, item{
-					title: r.Name,
-					desc:  "TXT Record -> " + r.Value,
+					title: "TXT : " + r.Name,
+					desc:  r.Value,
 				})
 			}
 
