@@ -14,19 +14,25 @@ type AppState int
 const (
 	StateLoggedOut AppState = iota
 	StateLoggedIn
+	StateLoading
 )
 
 type initialModel struct {
-	apiKey    string
-	apiSecret string
-	login     login.LoginModel
-	dashboard *dashboard.DashboardModel
-	state     AppState
+	apiKey        string
+	apiSecret     string
+	login         login.LoginModel
+	dashboard     *dashboard.DashboardModel
+	state         AppState
+	width, height int
 }
 
 type credentialsLoadedMsg struct {
 	apiKey    string
 	apiSecret string
+}
+
+type credentialsLoadErrorMsg struct {
+	Error string
 }
 
 func (m initialModel) Init() tea.Cmd {
@@ -36,7 +42,7 @@ func (m initialModel) Init() tea.Cmd {
 		func() tea.Msg {
 			creds, err := LoadCredentials()
 			if err != nil {
-				return nil
+				return credentialsLoadErrorMsg{Error: err.Error()}
 			}
 			return credentialsLoadedMsg{apiKey: creds.APIKey, apiSecret: creds.APISecret}
 		},
@@ -45,6 +51,10 @@ func (m initialModel) Init() tea.Cmd {
 
 func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c":
@@ -56,7 +66,13 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.apiSecret = msg.apiSecret
 		m.dashboard = dashboard.NewDashboardModel(m.apiKey, m.apiSecret)
 		m.state = StateLoggedIn
-		return m, m.dashboard.Init()
+		return m, tea.Batch(m.dashboard.Init(), func() tea.Msg {
+			return tea.WindowSizeMsg{Width: m.width, Height: m.height}
+		})
+
+	case credentialsLoadErrorMsg:
+		m.state = StateLoggedOut
+		return m, nil
 
 	case login.LoginSuccessMsg:
 		m.apiKey = msg.ApiKey
@@ -72,7 +88,9 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return login.LoginErrorMsg{Error: "Failed to save credentials: " + err.Error()}
 			}
 		}
-		return m, m.dashboard.Init()
+		return m, tea.Batch(m.dashboard.Init(), func() tea.Msg {
+			return tea.WindowSizeMsg{Width: m.width, Height: m.height}
+		})
 	}
 
 	if m.state == StateLoggedOut {
@@ -81,22 +99,31 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	}
 
-	updatedDashboard, cmd := m.dashboard.Update(msg)
-	m.dashboard = updatedDashboard.(*dashboard.DashboardModel)
-	return m, cmd
+	if m.state == StateLoggedIn && m.dashboard != nil {
+		updatedDashboard, cmd := m.dashboard.Update(msg)
+		m.dashboard = updatedDashboard.(*dashboard.DashboardModel)
+		return m, cmd
+	}
+
+	return m, nil
 }
 
 func (m initialModel) View() string {
 	if m.state == StateLoggedIn {
 		return m.dashboard.View()
 	}
-	return m.login.View()
+
+	if m.state == StateLoggedOut {
+		return m.login.View()
+	}
+	return ""
+
 }
 
 func main() {
 	p := tea.NewProgram(initialModel{
 		login: login.NewLoginModel(),
-		state: StateLoggedOut,
+		state: StateLoading,
 	}, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)

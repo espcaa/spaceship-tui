@@ -24,17 +24,23 @@ type DomainListModel struct {
 	Client  *spaceship.Client
 }
 
-func NewDomainListModel(client *spaceship.Client) *DomainListModel {
+func NewDomainListModel(client *spaceship.Client, cachedDomains []spaceship.DomainInfo) *DomainListModel {
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	l.Title = "Domains"
 	return &DomainListModel{
-		Domains: []spaceship.DomainInfo{},
+		Domains: cachedDomains,
 		List:    l,
 		Client:  client,
 	}
 }
 
 func (m *DomainListModel) Init() tea.Cmd {
+	if len(m.Domains) > 0 {
+		domains := m.Domains
+		return func() tea.Msg {
+			return DomainListSuccessMsg{Domains: domains}
+		}
+	}
 	return func() tea.Msg {
 		// get all of the domains and return them as a message
 		var skip int = 0
@@ -42,7 +48,7 @@ func (m *DomainListModel) Init() tea.Cmd {
 		var allDomains []spaceship.DomainInfo
 
 		for {
-			domains, err := m.Client.ListDomains(skip, take, "name")
+			domains, err := m.Client.ListDomains(take, skip, "name")
 			if err != nil {
 				return DomainListErrorMsg{Error: err.Error()}
 			}

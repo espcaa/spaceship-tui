@@ -3,6 +3,7 @@ package domainlist
 import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/espcaa/spaceship-tui/shared"
 )
 
 func (m *DomainListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -11,6 +12,18 @@ func (m *DomainListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "enter":
+			if len(m.List.Items()) == 0 {
+				return m, nil
+			}
+			selectedItem := m.List.SelectedItem().(item)
+			for _, domain := range m.Domains {
+				if domain.Name == selectedItem.title {
+					return m, func() tea.Msg {
+						return shared.DomainSelectedMsg{Domain: domain}
+					}
+				}
+			}
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
