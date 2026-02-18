@@ -26,7 +26,9 @@ func (m *DashboardModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case shared.DomainSelectedMsg:
 		m.ActiveScreen = shared.ScreenIndividualDomain
 		m.CurrentScreen = individualdomain.NewIndividualDomainModel(msg.Domain, m.Client)
-		return m, m.CurrentScreen.Init()
+		return m, tea.Batch(m.CurrentScreen.Init(), func() tea.Msg {
+			return tea.WindowSizeMsg{Width: m.width, Height: m.height}
+		})
 
 	case shared.SwitchScreenMsg:
 		m.ActiveScreen = msg.Screen
