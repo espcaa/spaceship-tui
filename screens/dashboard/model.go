@@ -1,6 +1,8 @@
 package dashboard
 
 import (
+	"database/sql"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/espcaa/spaceship-go"
 	"github.com/espcaa/spaceship-tui/shared"
@@ -18,13 +20,15 @@ type DashboardModel struct {
 	CurrentScreen tea.Model
 	Domains       []spaceship.DomainInfo
 	width, height int
+	Db            *sql.DB
 }
 
-func NewDashboardModel(apiKey, apiSecret string) *DashboardModel {
+func NewDashboardModel(apiKey, apiSecret string, db *sql.DB) *DashboardModel {
 	return &DashboardModel{
 		ApiKey:       apiKey,
 		ApiSecret:    apiSecret,
 		ActiveScreen: shared.ScreenDomainList,
+		Db:           db,
 	}
 }
 

@@ -1,6 +1,8 @@
 package individualdomain
 
 import (
+	"database/sql"
+
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -22,6 +24,7 @@ type IndividualDomainModel struct {
 	RecordsResponse spaceship.ListDNSRecordsResponse
 	State           State
 	Error           string
+	Db              *sql.DB
 	List            list.Model
 }
 
@@ -33,12 +36,13 @@ type DomainDetailsErrorMsg struct {
 	Error string
 }
 
-func NewIndividualDomainModel(domain spaceship.DomainInfo, client *spaceship.Client) *IndividualDomainModel {
+func NewIndividualDomainModel(domain spaceship.DomainInfo, client *spaceship.Client, db *sql.DB) *IndividualDomainModel {
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	l.Title = "DNS Records: " + domain.Name
 	return &IndividualDomainModel{
 		Domain: domain,
 		List:   l,
+		Db:     db,
 		Client: client,
 	}
 }
