@@ -1,6 +1,7 @@
 package individualdomain
 
 import (
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/espcaa/spaceship-go"
@@ -21,6 +22,7 @@ type IndividualDomainModel struct {
 	RecordsResponse spaceship.ListDNSRecordsResponse
 	State           State
 	Error           string
+	List            list.Model
 }
 
 type DomainDetailsSuccessMsg struct {
@@ -32,8 +34,11 @@ type DomainDetailsErrorMsg struct {
 }
 
 func NewIndividualDomainModel(domain spaceship.DomainInfo, client *spaceship.Client) *IndividualDomainModel {
+	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
+	l.Title = "DNS Records: " + domain.Name
 	return &IndividualDomainModel{
 		Domain: domain,
+		List:   l,
 		Client: client,
 	}
 }
@@ -65,3 +70,11 @@ func (m *IndividualDomainModel) Init() tea.Cmd {
 		return DomainDetailsSuccessMsg{Response: allRecords}
 	}
 }
+
+type item struct {
+	title, desc string
+}
+
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return i.desc }
+func (i item) FilterValue() string { return i.title }
