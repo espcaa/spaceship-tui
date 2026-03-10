@@ -1,0 +1,11 @@
+DELETE body: [
+  {
+    "cname": "alice.hackclub.app",
+    "group": {
+      "type": "custom"
+    },
+    "name": "@",
+    "ttl": 1800,
+    "type": "CNAME"
+  }
+]

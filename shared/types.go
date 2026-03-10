@@ -20,3 +20,5 @@ const (
 type SwitchScreenMsg struct {
 	Screen Screen
 }
+
+type CloseModalMsg struct{}

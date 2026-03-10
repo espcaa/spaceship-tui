@@ -5,7 +5,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 )
 
 var boxStyle = lipgloss.NewStyle().Padding(1, 2).
@@ -76,7 +76,7 @@ func (m LoginModel) renderAnimatedLogo(numberOfSpacesPerLine ...int) string {
 	return logostring.String()
 }
 
-func hexGlow(base string, glow float64) lipgloss.Color {
+func hexGlow(base string, glow float64) lipgloss.RGBColor {
 	var r, g, b uint8
 	fmt.Sscanf(base, "#%02x%02x%02x", &r, &g, &b)
 
@@ -88,7 +88,11 @@ func hexGlow(base string, glow float64) lipgloss.Color {
 	ng := clamp(float64(g)*factor, 0, 255)
 	nb := clamp(float64(b)*factor, 0, 255)
 
-	return lipgloss.Color(fmt.Sprintf("#%02x%02x%02x", int(nr), int(ng), int(nb)))
+	return lipgloss.RGBColor{
+		R: uint8(nr),
+		G: uint8(ng),
+		B: uint8(nb),
+	}
 }
 
 func lerp(a, b, t float64) float64 {

@@ -2,7 +2,7 @@ package domainlist
 
 import (
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/espcaa/spaceship-go"

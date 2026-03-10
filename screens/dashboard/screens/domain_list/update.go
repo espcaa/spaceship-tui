@@ -40,6 +40,7 @@ func (m *DomainListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		m.List.SetItems(items)
+
 	}
 	var cmd tea.Cmd
 	m.List, cmd = m.List.Update(msg)

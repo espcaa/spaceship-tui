@@ -1,6 +1,6 @@
 package dashboard
 
-import "github.com/charmbracelet/lipgloss"
+import "charm.land/lipgloss/v2"
 
 func (m *DashboardModel) View() string {
 	if m.CurrentScreen == nil {

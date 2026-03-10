@@ -3,9 +3,10 @@ package individualdomain
 import (
 	"database/sql"
 
+	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/espcaa/spaceship-go"
 )
 
@@ -26,11 +27,16 @@ type IndividualDomainModel struct {
 	Error           string
 	Db              *sql.DB
 	List            list.Model
+	Modal           tea.Model
+	height          int
+	width           int
 }
 
 type DomainDetailsSuccessMsg struct {
 	Response spaceship.ListDNSRecordsResponse
 }
+
+type CloseModalMsg struct{}
 
 type DomainDetailsErrorMsg struct {
 	Error string
@@ -39,6 +45,11 @@ type DomainDetailsErrorMsg struct {
 func NewIndividualDomainModel(domain spaceship.DomainInfo, client *spaceship.Client, db *sql.DB) *IndividualDomainModel {
 	l := list.New([]list.Item{}, list.NewDefaultDelegate(), 0, 0)
 	l.Title = "DNS Records: " + domain.Name
+	l.AdditionalShortHelpKeys = func() []key.Binding {
+		return []key.Binding{
+			key.NewBinding(key.WithKeys("d"), key.WithHelp("d", "delete")),
+		}
+	}
 	return &IndividualDomainModel{
 		Domain: domain,
 		List:   l,
@@ -77,6 +88,7 @@ func (m *IndividualDomainModel) Init() tea.Cmd {
 
 type item struct {
 	title, desc string
+	record      spaceship.DNSRecord
 }
 
 func (i item) Title() string       { return i.title }
