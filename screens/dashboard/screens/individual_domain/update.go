@@ -7,6 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/espcaa/spaceship-go"
 	deletemodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/delete"
+	modifymodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/modify"
 	"github.com/espcaa/spaceship-tui/shared"
 )
 
@@ -32,11 +33,6 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if m.Modal != nil {
 		var cmd tea.Cmd
-		// check if the cmd isn't CloseModalMsg
-		if _, ok := msg.(shared.CloseModalMsg); !ok {
-			m.Modal = nil
-			return m, nil
-		}
 		m.Modal, cmd = m.Modal.Update(msg)
 		return m, cmd
 	}
@@ -157,6 +153,14 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Modal = deletemodal.NewDeleteDNSRecordModel(
 					m.Domain.Name, selected.record,
 					selected.title, selected.record.GetType(),
+				)
+			}
+		case "m":
+			selected, ok := m.List.SelectedItem().(item)
+			if ok {
+				m.Modal = modifymodal.NewModifyDNSRecordModel(
+					m.Domain.Name, selected.record,
+					selected.title, selected.record.GetGroup(),
 				)
 			}
 		}
