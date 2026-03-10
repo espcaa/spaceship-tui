@@ -5,6 +5,7 @@ import (
 	"math"
 	"strings"
 
+	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
 
@@ -22,7 +23,7 @@ var subtitleStyle = lipgloss.NewStyle().Italic(true).Foreground(lipgloss.Color("
 var baseColor = lipgloss.Color("#475bff")
 var waveColor = lipgloss.Color("15")
 
-func (m LoginModel) View() string {
+func (m LoginModel) View() tea.View {
 	var buttons strings.Builder
 	for _, ti := range m.textInputs {
 		buttons.WriteString(ti.View() + "\n")
@@ -40,7 +41,7 @@ func (m LoginModel) View() string {
 
 	content := lipgloss.JoinHorizontal(lipgloss.Top, logoBlock, form)
 
-	return boxStyle.Render(content)
+	return tea.NewView(boxStyle.Render(content))
 }
 
 func (m LoginModel) renderAnimatedLogo(numberOfSpacesPerLine ...int) string {

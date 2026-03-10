@@ -1,7 +1,8 @@
 package login
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/espcaa/spaceship-go"
 )
 
@@ -47,12 +48,11 @@ func (m LoginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.errorText = msg.Error
 		return m, nil
 
-	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyEnter:
+	case tea.KeyPressMsg:
+		switch msg.String() {
+		case "enter":
 			return m, loginCmd(m.textInputs[0].Value(), m.textInputs[1].Value())
-
-		case tea.KeyTab, tea.KeyShiftTab, tea.KeyUp, tea.KeyDown:
+		case "tab", "down", "up", "shift+tab":
 			s := msg.String()
 
 			if s == "up" || s == "shift+tab" {
@@ -77,7 +77,6 @@ func (m LoginModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			return m, nil
 		}
-
 	}
 
 	for i := range m.textInputs {

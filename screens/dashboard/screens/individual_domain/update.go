@@ -3,8 +3,8 @@ package individualdomain
 import (
 	"fmt"
 
-	"github.com/charmbracelet/bubbles/list"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/list"
+	tea "charm.land/bubbletea/v2"
 	"github.com/espcaa/spaceship-go"
 	deletemodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/delete"
 	modifymodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/modify"
@@ -136,7 +136,7 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case DomainDetailsErrorMsg:
 		m.Error = msg.Error
 		m.State = LoadedState
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		if m.Error != "" {
 			m.Error = ""
 			return m, nil

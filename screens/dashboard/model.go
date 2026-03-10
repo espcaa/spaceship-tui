@@ -3,7 +3,8 @@ package dashboard
 import (
 	"database/sql"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/espcaa/spaceship-go"
 	"github.com/espcaa/spaceship-tui/shared"
 )

@@ -1,6 +1,9 @@
 package individualdomain
 
-import "charm.land/lipgloss/v2"
+import (
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
+)
 
 var modalStyle = lipgloss.NewStyle().
 	Border(lipgloss.RoundedBorder()).
@@ -9,10 +12,10 @@ var modalStyle = lipgloss.NewStyle().
 	Width(50).
 	Height(15)
 
-func (m *IndividualDomainModel) View() string {
+func (m *IndividualDomainModel) View() tea.View {
 	switch m.State {
 	case LoadingState:
-		return docStyle.Render("Loading domain details...")
+		return tea.NewView(docStyle.Render("Loading domain details..."))
 	case LoadedState:
 		base := docStyle.Render(m.List.View())
 		if m.Error != "" {
@@ -27,21 +30,21 @@ func (m *IndividualDomainModel) View() string {
 				lipgloss.NewLayer(base),
 				lipgloss.NewLayer(errBox).X(x).Y(y).Z(1),
 			)
-			return comp.Render()
+			return tea.NewView(comp.Render())
 		}
 		if m.Modal != nil {
-			modal := modalStyle.Render(m.Modal.View())
-			x := (m.width - lipgloss.Width(modal)) / 2
-			y := (m.height - lipgloss.Height(modal)) / 2
+			modal := modalStyle.Render
+			x := (m.width - lipgloss.Width(modal())) / 2
+			y := (m.height - lipgloss.Height(modal())) / 2
 
 			comp := lipgloss.NewCompositor(
 				lipgloss.NewLayer(base),
-				lipgloss.NewLayer(modal).X(x).Y(y).Z(1),
+				lipgloss.NewLayer(modal()).X(x).Y(y).Z(1),
 			)
-			return comp.Render()
+			return tea.NewView(comp.Render())
 		}
-		return base
+		return tea.NewView(base)
 	default:
-		return docStyle.Render("Unknown state")
+		return tea.NewView(docStyle.Render("Unknown state"))
 	}
 }

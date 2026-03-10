@@ -1,11 +1,15 @@
 package deletemodal
 
-import "fmt"
+import (
+	"fmt"
 
-func (m *DeleteDNSRecordModel) View() string {
+	tea "charm.land/bubbletea/v2"
+)
+
+func (m *DeleteDNSRecordModel) View() tea.View {
 	yes, no := "  Yes  ", "[ No ]"
 	if m.confirmed {
 		yes, no = "[ Yes ]", "  No  "
 	}
-	return fmt.Sprintf("Delete %s record '%s'?\n\n%s   %s", m.RecordType, m.RecordName, yes, no)
+	return tea.NewView(fmt.Sprintf("Delete %s record '%s'?\n\n%s   %s", m.RecordType, m.RecordName, yes, no))
 }

@@ -4,8 +4,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/espcaa/spaceship-tui/utils"
 )
 
@@ -35,14 +36,12 @@ func NewLoginModel() LoginModel {
 	for i := range inputs {
 		ti := textinput.New()
 		ti.Placeholder = inputs[i]
-		ti.PromptStyle = ti.PromptStyle.Bold(true)
-		ti.TextStyle = ti.TextStyle.Bold(true)
 		if i == 1 {
 			ti.EchoMode = textinput.EchoPassword
 			ti.EchoCharacter = '•'
 		}
 		ti.CharLimit = 64
-		ti.Width = 40
+		ti.SetWidth(40)
 
 		if i == 0 {
 			ti.Focus()

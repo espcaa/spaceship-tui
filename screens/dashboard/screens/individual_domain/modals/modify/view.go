@@ -3,9 +3,11 @@ package modifymodal
 import (
 	"fmt"
 	"strings"
+
+	tea "charm.land/bubbletea/v2"
 )
 
-func (m *ModifyDNSRecordModel) View() string {
+func (m *ModifyDNSRecordModel) View() tea.View {
 	var b strings.Builder
 
 	b.WriteString(fmt.Sprintf("Modify %s Record\n", m.RecordType))
@@ -28,5 +30,5 @@ func (m *ModifyDNSRecordModel) View() string {
 		b.WriteString("\n" + m.Error)
 	}
 
-	return b.String()
+	return tea.NewView(b.String())
 }

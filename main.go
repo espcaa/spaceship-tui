@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/espcaa/spaceship-tui/screens/dashboard"
 	"github.com/espcaa/spaceship-tui/screens/login"
 	_ "modernc.org/sqlite"
@@ -58,7 +59,7 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
@@ -111,7 +112,7 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m initialModel) View() string {
+func (m initialModel) View() tea.View {
 	if m.state == StateLoggedIn {
 		return m.dashboard.View()
 	}
@@ -119,7 +120,7 @@ func (m initialModel) View() string {
 	if m.state == StateLoggedOut {
 		return m.login.View()
 	}
-	return ""
+	return tea.NewView("")
 
 }
 
@@ -139,7 +140,7 @@ func main() {
 		login: login.NewLoginModel(),
 		state: StateLoading,
 		db:    db,
-	}, tea.WithAltScreen())
+	})
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)

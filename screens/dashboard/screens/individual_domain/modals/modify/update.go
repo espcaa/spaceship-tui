@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/espcaa/spaceship-tui/shared"
 )
 
@@ -13,7 +14,7 @@ func (m *ModifyDNSRecordModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	totalPositions := len(m.inputs) + 2
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "esc":
 			return m, func() tea.Msg { return shared.CloseModalMsg{} }

@@ -1,7 +1,8 @@
 package dashboard
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
+
 	domainlist "github.com/espcaa/spaceship-tui/screens/dashboard/screens/domain_list"
 	individualdomain "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain"
 	"github.com/espcaa/spaceship-tui/shared"
@@ -40,7 +41,7 @@ func (m *DashboardModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return tea.WindowSizeMsg{Width: m.width, Height: m.height}
 		})
 
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit

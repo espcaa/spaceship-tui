@@ -1,10 +1,11 @@
 package domainlist
 
 import (
-	"github.com/charmbracelet/bubbles/list"
+	list "charm.land/bubbles/v2/list"
 	"charm.land/lipgloss/v2"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
+
 	"github.com/espcaa/spaceship-go"
 )
 
