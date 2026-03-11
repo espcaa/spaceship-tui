@@ -33,13 +33,13 @@ func (m *IndividualDomainModel) View() tea.View {
 			return tea.NewView(comp.Render())
 		}
 		if m.Modal != nil {
-			modal := modalStyle.Render
-			x := (m.width - lipgloss.Width(modal())) / 2
-			y := (m.height - lipgloss.Height(modal())) / 2
+			modalContent := modalStyle.Render(m.Modal.View().Content)
+			x := (m.width - lipgloss.Width(modalContent)) / 2
+			y := (m.height - lipgloss.Height(modalContent)) / 2
 
 			comp := lipgloss.NewCompositor(
 				lipgloss.NewLayer(base),
-				lipgloss.NewLayer(modal()).X(x).Y(y).Z(1),
+				lipgloss.NewLayer(modalContent).X(x).Y(y).Z(1),
 			)
 			return tea.NewView(comp.Render())
 		}

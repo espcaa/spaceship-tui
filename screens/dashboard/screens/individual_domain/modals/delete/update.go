@@ -17,7 +17,7 @@ func (m *DeleteDNSRecordModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "left", "right", "tab":
 			m.confirmed = !m.confirmed
 		case "enter":
-			return m, func() tea.Msg { return CloseDeleteDNSRecordMsg{Confirmed: m.confirmed} }
+			return m, func() tea.Msg { return CloseDeleteDNSRecordMsg{Confirmed: m.confirmed, Record: m.Record} }
 		case "esc":
 			return m, func() tea.Msg { return shared.CloseModalMsg{} }
 		}

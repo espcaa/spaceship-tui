@@ -36,8 +36,6 @@ type DomainDetailsSuccessMsg struct {
 	Response spaceship.ListDNSRecordsResponse
 }
 
-type CloseModalMsg struct{}
-
 type DomainDetailsErrorMsg struct {
 	Error string
 }

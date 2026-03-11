@@ -13,6 +13,11 @@ import (
 
 func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
+	if _, ok := msg.(shared.CloseModalMsg); ok {
+		m.Modal = nil
+		return m, nil
+	}
+
 	if closeMsg, ok := msg.(deletemodal.CloseDeleteDNSRecordMsg); ok {
 		m.Modal = nil
 		if closeMsg.Confirmed {
@@ -22,6 +27,24 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			record := closeMsg.Record
 			return m, func() tea.Msg {
 				err := m.Client.DeleteDNSRecords(m.Domain.Name, []spaceship.DNSRecord{record})
+				if err != nil {
+					return DomainDetailsErrorMsg{Error: err.Error()}
+				}
+				return nil
+			}
+		}
+		return m, nil
+	}
+
+	if closeMsg, ok := msg.(modifymodal.CloseModifyDNSRecordMsg); ok {
+		m.Modal = nil
+		if closeMsg.Confirmed {
+			return m, func() tea.Msg {
+				err := m.Client.DeleteDNSRecords(m.Domain.Name, []spaceship.DNSRecord{closeMsg.Original})
+				if err != nil {
+					return DomainDetailsErrorMsg{Error: err.Error()}
+				}
+				err = m.Client.SaveDNSRecords(m.Domain.Name, false, []spaceship.DNSRecord{closeMsg.Modified})
 				if err != nil {
 					return DomainDetailsErrorMsg{Error: err.Error()}
 				}
