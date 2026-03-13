@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/espcaa/spaceship-tui/shared"
 )
 
 func (m *ModifyDNSRecordModel) View() tea.View {
@@ -18,13 +19,16 @@ func (m *ModifyDNSRecordModel) View() tea.View {
 
 	b.WriteString("\n")
 
-	save, cancel := "  Save  ", "  Cancel  "
+	save := shared.ButtonStyle.Render("Save")
+	cancel := shared.ButtonStyle.Render("Cancel")
+
 	if m.focusIndex == len(m.inputs) {
-		save = "[ Save ]"
+		save = shared.ActiveButtonStyle.Render("Save")
 	} else if m.focusIndex == len(m.inputs)+1 {
-		cancel = "[ Cancel ]"
+		cancel = shared.ActiveButtonStyle.Render("Cancel")
 	}
-	b.WriteString(fmt.Sprintf("%s   %s", save, cancel))
+
+	fmt.Fprintf(&b, "%s \n\n%s", save, cancel)
 
 	if m.Error != "" {
 		b.WriteString("\n" + m.Error)

@@ -39,6 +39,8 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if closeMsg, ok := msg.(modifymodal.CloseModifyDNSRecordMsg); ok {
 		m.Modal = nil
 		if closeMsg.Confirmed {
+			idx := m.List.Index()
+			m.List.SetItem(idx, recordToItem(closeMsg.Modified))
 			return m, func() tea.Msg {
 				err := m.Client.DeleteDNSRecords(m.Domain.Name, []spaceship.DNSRecord{closeMsg.Original})
 				if err != nil {
@@ -171,12 +173,12 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return shared.SwitchScreenMsg{Screen: shared.ScreenDomainList}
 			}
 
-		case "m":
+		case "m", "enter":
 			selected, ok := m.List.SelectedItem().(item)
 			if ok {
 				m.Modal = modifymodal.NewModifyDNSRecordModel(
 					m.Domain.Name, selected.record,
-					selected.title, selected.record.GetGroup(),
+					selected.record.GetType(), selected.record.GetGroup(),
 				)
 			}
 		case "del", "backspace":
