@@ -8,9 +8,7 @@ import (
 var modalStyle = lipgloss.NewStyle().
 	Border(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("#7571F9")).
-	Padding(1, 2).
-	Width(50).
-	Height(15)
+	Padding(1, 3)
 
 func (m *IndividualDomainModel) View() tea.View {
 	switch m.State {

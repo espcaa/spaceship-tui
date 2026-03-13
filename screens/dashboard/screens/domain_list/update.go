@@ -43,6 +43,7 @@ func (m *DomainListModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		for i, domain := range m.Domains {
 			items[i] = item{
 				title: domain.Name,
+				desc:  domain.RegistrationDate,
 			}
 		}
 		cmds = append(cmds, m.List.SetItems(items))

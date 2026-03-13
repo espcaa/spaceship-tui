@@ -54,6 +54,13 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
+	if msg, ok := msg.(tea.WindowSizeMsg); ok {
+		h, v := docStyle.GetFrameSize()
+		m.List.SetSize(msg.Width-h, msg.Height-v)
+		m.width = msg.Width
+		m.height = msg.Height
+	}
+
 	if m.Modal != nil {
 		var cmd tea.Cmd
 		m.Modal, cmd = m.Modal.Update(msg)
@@ -61,12 +68,6 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
-
-	case tea.WindowSizeMsg:
-		h, v := docStyle.GetFrameSize()
-		m.List.SetSize(msg.Width-h, msg.Height-v)
-		m.width = msg.Width
-		m.height = msg.Height
 	case DomainDetailsSuccessMsg:
 		m.RecordsResponse = msg.Response
 
@@ -170,14 +171,6 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return shared.SwitchScreenMsg{Screen: shared.ScreenDomainList}
 			}
 
-		case "d":
-			selected, ok := m.List.SelectedItem().(item)
-			if ok {
-				m.Modal = deletemodal.NewDeleteDNSRecordModel(
-					m.Domain.Name, selected.record,
-					selected.title, selected.record.GetType(),
-				)
-			}
 		case "m":
 			selected, ok := m.List.SelectedItem().(item)
 			if ok {
@@ -185,6 +178,11 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.Domain.Name, selected.record,
 					selected.title, selected.record.GetGroup(),
 				)
+			}
+		case "del", "backspace":
+			selected, ok := m.List.SelectedItem().(item)
+			if ok {
+				m.Modal = deletemodal.NewDeleteDNSRecordModel(m.Domain.Name, selected.record, selected.title, selected.record.GetType())
 			}
 		}
 	}
