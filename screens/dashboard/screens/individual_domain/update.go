@@ -212,7 +212,7 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.Modal = deletemodal.NewDeleteDNSRecordModel(m.Domain.Name, selected.record, selected.title, selected.record.GetType())
 			}
-		case "a":
+		case "a", "n":
 			m.Modal = typeselectmodal.NewTypeSelectModel(m.Domain.Name)
 		}
 	}
