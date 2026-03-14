@@ -2,13 +2,11 @@ module github.com/espcaa/spaceship-tui
 
 go 1.25.4
 
-replace github.com/espcaa/spaceship-go => ../spaceship-go
-
 require (
 	charm.land/bubbles/v2 v2.0.0
 	charm.land/bubbletea/v2 v2.0.2
 	charm.land/lipgloss/v2 v2.0.1
-	github.com/espcaa/spaceship-go v0.0.0-00010101000000-000000000000
+	github.com/espcaa/spaceship-go v0.1.0
 	github.com/zalando/go-keyring v0.2.6
 	modernc.org/sqlite v1.46.1
 )
