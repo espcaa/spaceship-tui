@@ -47,6 +47,8 @@ func NewIndividualDomainModel(domain spaceship.DomainInfo, client *spaceship.Cli
 	l.AdditionalShortHelpKeys = func() []key.Binding {
 		return []key.Binding{
 			key.NewBinding(key.WithKeys("del"), key.WithHelp("del", "delete")),
+			key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "modify")),
+			key.NewBinding(key.WithKeys("a"), key.WithHelp("a", "add")),
 		}
 	}
 	return &IndividualDomainModel{

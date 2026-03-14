@@ -6,8 +6,10 @@ import (
 	"charm.land/bubbles/v2/list"
 	tea "charm.land/bubbletea/v2"
 	"github.com/espcaa/spaceship-go"
+	createmodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/create"
 	deletemodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/delete"
 	modifymodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/modify"
+	typeselectmodal "github.com/espcaa/spaceship-tui/screens/dashboard/screens/individual_domain/modals/typeselect"
 	"github.com/espcaa/spaceship-tui/shared"
 )
 
@@ -16,6 +18,14 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if _, ok := msg.(shared.CloseModalMsg); ok {
 		m.Modal = nil
 		return m, nil
+	}
+
+	if typeSelectedMsg, ok := msg.(shared.TypeSelectedMsg); ok {
+		m.Modal = nil
+		return m, func() tea.Msg {
+			m.Modal = createmodal.NewCreateDNSRecordModel(m.Domain.Name, typeSelectedMsg.RecordType, "")
+			return nil
+		}
 	}
 
 	if closeMsg, ok := msg.(deletemodal.CloseDeleteDNSRecordMsg); ok {
@@ -27,6 +37,22 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			record := closeMsg.Record
 			return m, func() tea.Msg {
 				err := m.Client.DeleteDNSRecords(m.Domain.Name, []spaceship.DNSRecord{record})
+				if err != nil {
+					return DomainDetailsErrorMsg{Error: err.Error()}
+				}
+				return nil
+			}
+		}
+		return m, nil
+	}
+
+	if closeMsg, ok := msg.(createmodal.CloseCreateDNSRecordMsg); ok {
+		m.Modal = nil
+		if closeMsg.Confirmed {
+			m.List.InsertItem(len(m.List.Items()), recordToItem(closeMsg.Record))
+			record := closeMsg.Record
+			return m, func() tea.Msg {
+				err := m.Client.SaveDNSRecords(m.Domain.Name, false, []spaceship.DNSRecord{record})
 				if err != nil {
 					return DomainDetailsErrorMsg{Error: err.Error()}
 				}
@@ -186,6 +212,8 @@ func (m *IndividualDomainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if ok {
 				m.Modal = deletemodal.NewDeleteDNSRecordModel(m.Domain.Name, selected.record, selected.title, selected.record.GetType())
 			}
+		case "a":
+			m.Modal = typeselectmodal.NewTypeSelectModel(m.Domain.Name)
 		}
 	}
 

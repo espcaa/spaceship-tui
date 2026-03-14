@@ -23,3 +23,7 @@ type SwitchScreenMsg struct {
 }
 
 type CloseModalMsg struct{}
+
+type TypeSelectedMsg struct {
+	RecordType string
+}
