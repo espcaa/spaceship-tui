@@ -27,3 +27,5 @@ type CloseModalMsg struct{}
 type TypeSelectedMsg struct {
 	RecordType string
 }
+
+type SignOutMsg struct{}

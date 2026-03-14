@@ -9,6 +9,7 @@ import (
 
 	"github.com/espcaa/spaceship-tui/screens/dashboard"
 	"github.com/espcaa/spaceship-tui/screens/login"
+	"github.com/espcaa/spaceship-tui/shared"
 	_ "modernc.org/sqlite"
 )
 
@@ -77,6 +78,13 @@ func (m initialModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case credentialsLoadErrorMsg:
 		m.state = StateLoggedOut
 		return m, nil
+
+	case shared.SignOutMsg:
+		DeleteCredentials()
+		m.state = StateLoggedOut
+		m.dashboard = nil
+		m.login = login.NewLoginModel()
+		return m, m.login.Init()
 
 	case login.LoginSuccessMsg:
 		m.apiKey = msg.ApiKey

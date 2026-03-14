@@ -45,6 +45,8 @@ func (m *DashboardModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c":
 			return m, tea.Quit
+		case "ctrl+l":
+			return m, func() tea.Msg { return shared.SignOutMsg{} }
 		}
 	}
 

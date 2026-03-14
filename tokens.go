@@ -102,6 +102,13 @@ func saveCredentialsToDisk(creds Credentials) error {
 	return nil
 }
 
+func DeleteCredentials() {
+	keyring.Delete("spaceship-tui", "api_key")
+	keyring.Delete("spaceship-tui", "api_secret")
+	homedir, _ := os.UserHomeDir()
+	os.Remove(homedir + "/.config/spaceship-tui/secrets.json")
+}
+
 func saveCredentialsToKeyring(creds Credentials) error {
 
 	err := keyring.Set("spaceship-tui", "api_key", creds.APIKey)
